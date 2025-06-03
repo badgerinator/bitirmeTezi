@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aday Değerlendirme Karar Destek Sistemi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.20.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .section-title {
+            font-size: 1.875rem; /* 30px */
+            font-weight: 700;
+            color: #3730a3; /* indigo-800 */
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #6366f1; /* indigo-500 */
+        }
+        .subsection-title {
+            font-size: 1.5rem; /* 24px */
+            font-weight: 600;
+            color: #4338ca; /* indigo-700 */
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .content-text {
+            font-size: 1rem; /* 16px */
+            line-height: 1.75;
+            color: #374151; /* gray-700 */
+            margin-bottom: 1rem;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #d1d5db; /* gray-300 */
+            padding: 0.75rem;
+            text-align: left;
+            font-size: 0.875rem; /* 14px */
+        }
+        th {
+            background-color: #eef2ff; /* indigo-50 */
+            font-weight: 600;
+            color: #3730a3; /* indigo-800 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 1rem;
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            margin-bottom: 2rem;
+            height: 400px; /* Default height */
+        }
+        .chart-container.large {
+            height: 500px;
+        }
+        .flow-diagram {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .flow-box, .flow-script {
+            background-color: #e0e7ff; /* indigo-200 */
+            border: 2px solid #818cf8; /* indigo-400 */
+            color: #3730a3; /* indigo-800 */
+            padding: 1rem;
+            border-radius: 0.375rem;
+            text-align: center;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .flow-script {
+            background-color: #c7d2fe; /* indigo-300 */
+            font-weight: 600;
+        }
+        .flow-arrow {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #6366f1; /* indigo-500 */
+            margin: 0.5rem 0;
+        }
+        /* Sticky Navbar */
+        #navbar {
+            overflow: hidden;
+            background-color: #3730a3; /* indigo-800 */
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        #navbar a {
+            float: left;
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+            font-size: 0.875rem; /* 14px */
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        #navbar a:hover {
+            background-color: #4f46e5; /* indigo-600 */
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        /* MathJax styling */
+        mjx-container {
+            margin: 1em 0 !important;
+        }
+    </style>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <header class="bg-gradient-to-r from-indigo-700 to-purple-700 text-white py-8 shadow-lg">
+        <div class="container mx-auto px-6 text-center">
+            <h1 class="text-4xl font-bold mb-2">Aday Değerlendirme Karar Destek Sistemi</h1>
+            <p class="text-lg opacity-90">AHP, TOPSIS ve ELECTRE Tabanlı Kapsamlı Analiz ve Raporlama</p>
+        </div>
+    </header>
+
+    <nav id="navbar">
+        <div class="nav-container">
+            <a href="#giris">Giriş</a>
+            <a href="#veri-akisi">Veri Akışı</a>
+            <a href="#python-kodlari">Python Kodları</a>
+            <a href="#excel-ciktilari">Excel Çıktıları</a>
+            <a href="#metodoloji">Metodoloji</a>
+            <a href="#sonuclar">Sonuçlar</a>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-6 py-8">
+
+        <section id="giris" class="bg-white p-6 md:p-8 rounded-lg shadow-md mb-8">
+            <h2 class="section-title">1. Projenin Genel Amacı ve Kapsamı</h2>
+            <p class="content-text">
+                Bu projenin temel hedefi, mevcut bir aday havuzundaki bireylerin, çağdaş Çok Kriterli Karar Verme (ÇKKV) metodolojileri kullanılarak, objektif kriterlere dayalı, şeffaf ve sistematik bir yaklaşımla değerlendirilmesi ve sıralanmasıdır. Geleneksel işe alım ve değerlendirme süreçlerinde sıkça rastlanan kişisel yanlılıklar, tutarsız değerlendirmeler ve şeffaflık eksikliği gibi sorunların üstesinden gelmek, bu projenin ana motivasyon kaynaklarından biridir.
+            </p>
+            <h3 class="subsection-title">Kullanılan Metodolojiler</h3>
+            <ul class="list-disc list-inside content-text pl-4 space-y-2">
+                <li><strong>AHP (Analitik Hiyerarşi Süreci):</strong> Kriter ağırlıklarının belirlenmesi.</li>
+                <li><strong>TOPSIS (Technique for Order of Preference by Similarity to Ideal Solution):</strong> Adayların ideal çözüme göre sıralanması.</li>
+                <li><strong>ELECTRE (ELimination Et Choix Traduisant la REalité):</strong> Adaylar arası baskınlık (dominance) ilişkilerinin çıkarılması.</li>
+                <li><strong>Birleşik Raporlama:</strong> Yönetim/kurul için karşılaştırmalı özet.</li>
+            </ul>
+             <h3 class="subsection-title">Akademik Bağlam</h3>
+            <p class="content-text">
+                Bu çalışma, başından sonuna kadar akademik titizlik ilkelerine bağlı kalınarak yürütülmüştür. Değerlendirmelerde ve analizlerde kullanılan tüm veriler, proje kapsamında sağlanan <code>aday_havuzu.xlsx</code> ve uzman değerlendirmelerini içeren <code>ahp_expert_filled.xlsx</code> gibi dosyalardan türetilmiştir. Dışsal veri kaynaklarından veya proje dışı bilgilerden kesinlikle yararlanılmamıştır.
+            </p>
+        </section>
+
+        <section id="veri-akisi" class="bg-white p-6 md:p-8 rounded-lg shadow-md mb-8">
+            <h2 class="section-title">2. Genel Veri Akışı ve Sistem Mimarisi</h2>
+            <p class="content-text">
+                Bu bölümde, projenin başlangıcından sonuna kadar verinin izlediği yol, bu süreçte kullanılan Python script'leri, üretilen ara ve nihai Excel çıktıları detaylı bir akış şeması ile görselleştirilerek açıklanmaktadır.
+            </p>
+            <h3 class="subsection-title">Veri Akış Şeması</h3>
+            <div class="flow-diagram p-4 bg-gray-100 rounded-md">
+                <div class="flow-box">📄 aday_havuzu.xlsx</div>
+                <div class="flow-arrow self-center">➡️</div>
+                <div class="flow-script">🐍 1_tamTemiz_pipeline.py</div>
+                <div class="flow-arrow self-center">➡️</div>
+                <div class="flow-box">📄 processed_candidates_full.xlsx</div>
+                <div class="flow-arrow self-center">➡️</div>
+                <div class="flow-script">🐍 2_scaler.py</div>
+                <div class="flow-arrow self-center">➡️</div>
+                <div class="flow-box">📊 processed_candidates_anonymized_scaled.xlsx</div>
+
+                <div class="flow-script col-start-1">🐍 3_ahp_expert_template_generator.py</div>
+                <div class="flow-arrow self-center">➡️</div>
+                <div class="flow-box">📄 ahp_matrices_formullu.xlsx</div>
+                <div class="flow-arrow self-center">➡️</div>
+                <div class="flow-box">📝 ahp_expert_filled.xlsx</div>
+                <div class="flow-arrow self-center">➡️</div>
+                <div class="flow-script">🐍 4_ahp_calculator.py</div>
+                <div class="flow-arrow self-center">➡️</div>
+                <div class="flow-box">⚖️ ahp_weights_summary.xlsx</div>
+            </div>
+            <div class="flex justify-center my-4"><div class="flow-arrow text-4xl">⬇️</div></div>
+            <div class="flow-diagram p-4 bg-gray-100 rounded-md justify-center">
+                 <div class="flow-box col-start-1 md:col-start-2">📊 processed_candidates_anonymized_scaled.xlsx</div>
+                 <div class="flow-box col-start-1 md:col-start-2">⚖️ ahp_weights_summary.xlsx (Birlesik_Agirlik)</div>
+                 <div class="flow-arrow self-center md:col-start-2">⬇️</div>
+                 <div class="flow-script col-start-1 md:col-start-2">🐍 multi_criteria_ranking_pipeline.py</div>
+                 <div class="flow-arrow self-center md:col-start-2">⬇️</div>
+                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:col-start-1 md:col-span-3">
+                    <div class="flow-box bg-green-100 border-green-500">🏆 TOPSIS_Ranking.xlsx</div>
+                    <div class="flow-box bg-green-100 border-green-500">🥇 ELECTRE_Results.xlsx</div>
+                    <div class="flow-box bg-green-100 border-green-500">📈 combined_ranking_report.xlsx</div>
+                    <div class="flow-box bg-yellow-100 border-yellow-500">📄 ELECTRE_Concordance.xlsx</div>
+                    <div class="flow-box bg-yellow-100 border-yellow-500">📄 ELECTRE_Discordance.xlsx</div>
+                    <div class="flow-box bg-yellow-100 border-yellow-500">📄 ELECTRE_Outranking.xlsx</div>
+                 </div>
+            </div>
+             <div class="flex justify-center my-4"><div class="flow-arrow text-4xl">⬇️</div></div>
+             <div class="flow-diagram p-4 bg-gray-100 rounded-md justify-center">
+                <div class="flow-script col-start-1 md:col-start-2">💻 multi_criteria_ranking_demo.ipynb</div>
+                <div class="flow-arrow self-center md:col-start-2">➡️</div>
+                <div class="flow-box bg-purple-100 border-purple-500 md:col-start-2">📊 Yönetim Sunumları (Görselleştirme & Parametrik Analiz)</div>
+             </div>
+
+            <h3 class="subsection-title">Modülerlik ve Tekrarlanabilirlik</h3>
+            <p class="content-text">
+                Veri akışının ve kullanılan Python script'lerinin modüler bir yapıda tasarlanmış olması, sistemin önemli avantajlarından biridir. Bu yapı, sürecin farklı aday havuzları, farklı değerlendirme kriterleri veya farklı uzman grupları ile kolayca tekrarlanabilirliğini ve ölçeklenebilirliğini de önemli ölçüde artırmaktadır.
+            </p>
+            <h3 class="subsection-title">Denetlenebilirlik ve Şeffaflık</h3>
+            <p class="content-text">
+                Proje sürecinde, her ana aşamanın sonunda ara çıktıların üretilmesi, tüm değerlendirme sürecinin denetlenebilirliğini ve şeffaflığını önemli ölçüde artırmaktadır. Bu ara dosyalar, bir tür denetim izi (audit trail) görevi görerek, nihai sıralamaların ve kararların nasıl ve hangi verilere dayanılarak verildiğinin geriye dönük olarak izlenebilmesine olanak tanır.
+            </p>
+        </section>
+
+        <section id="python-kodlari" class="bg-white p-6 md:p-8 rounded-lg shadow-md mb-8">
+            <h2 class="section-title">3. Kullanılan Python Kodları ve İşlevleri</h2>
+
+            <article>
+                <h3 class="subsection-title">3.1. <code>1_tamTemiz_pipeline.py</code>: Veri Ön İşleme ve Özellik Mühendisliği</h3>
+                <p class="content-text">Bu script, ham veri kaynağı olan <code>aday_havuzu.xlsx</code> dosyasını okuyarak, içerisindeki aday bilgilerini temizler ve ham veriden ÇKKV analizlerinde kullanılacak anlamlı, nicel özellikler (kriterler) türetir.</p>
+                <strong class="text-indigo-600">Özellik Çıkarma Detayları:</strong>
+                <ul class="list-disc list-inside content-text pl-4 space-y-1">
+                    <li>Toplam Deneyim Süresi</li>
+                    <li>Yabancı Dil Seviyesi</li>
+                    <li>Temel Bilgisayar Becerileri</li>
+                    <li>Sertifika Sayısı</li>
+                    <li>Eğitim Düzeyi</li>
+                    <li>Sosyal Aktivite Skoru (Metin madenciliği ve embedding ile)</li>
+                </ul>
+                <strong class="text-indigo-600">Çıktıları:</strong> <code>processed_candidates_full.xlsx</code>, <code>processed_candidates_anonymized_scaled.xlsx</code>
+            </article>
+
+            <article>
+                <h3 class="subsection-title">3.2. <code>2_scaler.py</code>: Veri Ölçekleme ve Normalizasyon</h3>
+                <p class="content-text">Bu script, özelliklerin (kriterlerin) sayısal değerlerini standart bir aralığa (genellikle 0-100 min-max normalizasyonu) getirir. Formül: \(X_{scaled} = \frac{X - X_{min}}{X_{max} - X_{min}} \times 100\)</p>
+                <strong class="text-indigo-600">Çıktısı:</strong> Güncellenmiş <code>processed_candidates_anonymized_scaled.xlsx</code>
+            </article>
+
+            <article>
+                <h3 class="subsection-title">3.3. <code>3_ahp_expert_template_generator.py</code>: AHP Uzman Değerlendirme Şablonu Oluşturucu</h3>
+                <p class="content-text">Uzmanların kriterleri ikili olarak karşılaştırabilmeleri için standart bir AHP matris şablonu (<code>ahp_matrices_formullu.xlsx</code>) oluşturur.</p>
+            </article>
+
+            <article>
+                <h3 class="subsection-title">3.4. <code>4_ahp_calculator.py</code>: AHP Ağırlık Hesaplayıcı ve Tutarlılık Analizcisi</h3>
+                <p class="content-text">Doldurulmuş <code>ahp_expert_filled.xlsx</code> dosyasını okur, her uzman için ağırlık vektörlerini ve tutarlılık metriklerini (CI, CR) hesaplar. Birleşik ağırlıkları (genellikle geometrik ortalama ile) belirler. CR ≤ 0.15 filtresi uygulanır.</p>
+                <strong class="text-indigo-600">Çıktısı:</strong> <code>ahp_weights_summary.xlsx</code> (Sheetler: <code>Uzman_Agirliklari</code>, <code>Birlesik_Agirlik</code>, <code>Consistency_Results</code>)
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                    <div>
+                        <h4 class="text-lg font-semibold text-indigo-700 mb-2 text-center">Nihai Birleşik Kriter Ağırlıkları</h4>
+                        <div class="chart-container large">
+                            <canvas id="ahpWeightsChart"></canvas>
+                        </div>
+                        <p class="text-xs text-center text-gray-500 mt-1">Bu grafik, her bir kriterin nihai ağırlığını göstermektedir. En önemli kriterler "Deneyim Seviyesi" ve "Basic Computer Skills Skoru" olarak öne çıkmaktadır.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-semibold text-indigo-700 mb-2 text-center">Uzman Ağırlıklarının Karşılaştırılması (Radar)</h4>
+                        <div class="chart-container large">
+                            <canvas id="expertWeightsRadarChart"></canvas>
+                        </div>
+                         <p class="text-xs text-center text-gray-500 mt-1">Bu radar şeması, 6 uzmanın her bir kritere verdiği ağırlığı karşılaştırmalı olarak sunar, uzmanlar arası görüş ayrılıklarını ve benzerliklerini vurgular.</p>
+                    </div>
+                </div>
+                 <div class="table-container mt-6">
+                    <h4 class="text-lg font-semibold text-indigo-700 mb-2">Bireysel Uzman Ağırlıkları ve Tutarlılık Oranları (CR)</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Kriter</th>
+                                <th>Uzman_1 Ağırlık (CR: 0.286)</th>
+                                <th>Uzman_2 Ağırlık (CR: 0.206)</th>
+                                <th>Uzman_3 Ağırlık (CR: 0.170)</th>
+                                <th>Uzman_4 Ağırlık (CR: 0.095)</th>
+                                <th>Uzman_5 Ağırlık (CR: 0.084)</th>
+                                <th>Uzman_6 Ağırlık (CR: 0.035)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Deneyim Seviyesi (Kategori)</td><td>0.1514</td><td>0.2230</td><td>0.4888</td><td>0.2746</td><td>0.2755</td><td>0.3795</td></tr>
+                            <tr><td>Yabancı Dil Skoru</td><td>0.2939</td><td>0.2607</td><td>0.0360</td><td>0.0249</td><td>0.4010</td><td>0.0693</td></tr>
+                            <tr><td>Eğitim Seviyesi Skoru</td><td>0.3517</td><td>0.2265</td><td>0.1496</td><td>0.0581</td><td>0.0540</td><td>0.2494</td></tr>
+                            <tr><td>Basic Computer Skills Skoru</td><td>0.0361</td><td>0.1043</td><td>0.2073</td><td>0.4609</td><td>0.0937</td><td>0.1339</td></tr>
+                            <tr><td>Katıldığınız Kurs/Seminer/Sertifika Skoru</td><td>0.0330</td><td>0.0427</td><td>0.0467</td><td>0.1099</td><td>0.0383</td><td>0.0440</td></tr>
+                            <tr><td>Sosyal Aktivite Skoru (0-100)</td><td>0.1339</td><td>0.1427</td><td>0.0715</td><td>0.0717</td><td>0.1375</td><td>0.1239</td></tr>
+                        </tbody>
+                    </table>
+                     <p class="text-xs text-gray-500 mt-1">Not: CR > 0.15 olan uzmanların (Uzman_1, Uzman_2, Uzman_3) yargıları tutarsız kabul edilebilir. Birleşik CR: 0.038.</p>
+                </div>
+            </article>
+
+            <article>
+                <h3 class="subsection-title">3.5. <code>multi_criteria_ranking_pipeline.py</code>: Çok Kriterli Sıralama Motoru</h3>
+                <p class="content-text">AHP ağırlıklarını ve normalize edilmiş aday verilerini kullanarak TOPSIS ve ELECTRE metodolojilerini uygular.</p>
+                <strong class="text-indigo-600">TOPSIS Uygulaması:</strong> İdeale yakınlık katsayısı (CC) hesaplanır: \(CC_i = \frac{S_i^-}{S_i^+ + S_i^-}\)
+                <br>
+                <strong class="text-indigo-600">ELECTRE Uygulaması:</strong> Uyum (Concordance), Uyumsuzluk (Discordance) ve Baskınlık (Outranking) matrisleri oluşturulur.
+                <br>
+                <strong class="text-indigo-600">Çıktıları:</strong> <code>TOPSIS_Ranking.xlsx</code>, <code>ELECTRE_Results.xlsx</code>, <code>combined_ranking_report.xlsx</code>, <code>ELECTRE_Concordance.xlsx</code>, <code>ELECTRE_Discordance.xlsx</code>, <code>ELECTRE_Outranking.xlsx</code>.
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                    <div>
+                        <h4 class="text-lg font-semibold text-indigo-700 mb-2 text-center">TOPSIS Skorları (İlk 10 Aday)</h4>
+                        <div class="chart-container large">
+                            <canvas id="topsisScoresChart"></canvas>
+                        </div>
+                        <p class="text-xs text-center text-gray-500 mt-1">Bu grafik, TOPSIS metodolojisi ile en yüksek "ideale yakınlık" skorunu alan ilk 10 adayı göstermektedir.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-semibold text-indigo-700 mb-2 text-center">ELECTRE Baskınlık Skorları (İlk 10 Aday)</h4>
+                        <div class="chart-container large">
+                            <canvas id="electreScoresChart"></canvas>
+                        </div>
+                         <p class="text-xs text-center text-gray-500 mt-1">Bu grafik, ELECTRE metodolojisi ile en yüksek "net baskınlık" skoruna sahip ilk 10 adayı göstermektedir.</p>
+                    </div>
+                </div>
+                <div class="mt-6">
+                    <h4 class="text-lg font-semibold text-indigo-700 mb-2 text-center">TOPSIS Skoru vs. ELECTRE Sırası (Tüm Adaylar)</h4>
+                    <div class="chart-container large">
+                        <canvas id="topsisVsElectreScatterChart"></canvas>
+                    </div>
+                    <p class="text-xs text-center text-gray-500 mt-1">Bu saçılım grafiği, adayların TOPSIS skorları ile ELECTRE sıraları arasındaki ilişkiyi gösterir, iki metodun sonuçları arasındaki genel uyumu ve aykırı değerleri ortaya koyar.</p>
+                </div>
+                 <div class="mt-6">
+                    <h4 class="text-lg font-semibold text-indigo-700 mb-2 text-center">ELECTRE Baskınlık Matrisi (Heatmap - İlk 15 Aday)</h4>
+                    <div class="chart-container large" style="min-height: 550px;"> <!-- Increased min-height for heatmap -->
+                        <div id="electreOutrankingHeatmap" class="w-full h-full"></div>
+                    </div>
+                    <p class="text-xs text-center text-gray-500 mt-1">Bu ısı haritası, ilk 15 adayın birbirleriyle olan baskınlık ilişkilerini gösterir. Koyu renk, satırdaki adayın sütundaki adayı baskıladığını (outrank ettiğini) belirtir.</p>
+                </div>
+
+            </article>
+
+            <article>
+                <h3 class="subsection-title">3.6. <code>multi_criteria_ranking_demo.ipynb</code>: İnteraktif Analiz ve Görselleştirme Not Defteri</h3>
+                <p class="content-text">ELECTRE eşik değerlerinin (Concordance, Discordance) sonuçlara etkisini interaktif olarak inceler. TOPSIS ve ELECTRE sonuçlarını görselleştirir.</p>
+            </article>
+        </section>
+
+        <section id="excel-ciktilari" class="bg-white p-6 md:p-8 rounded-lg shadow-md mb-8">
+            <h2 class="section-title">4. Excel Çıktı Dosyaları ve Sheet Yapıları</h2>
+            <p class="content-text">Proje süresince üretilen her bir Excel dosyasının ve bu dosyalar içindeki çalışma sayfalarının yapıları aşağıda özetlenmiştir.</p>
+            
+            <div class="table-container">
+                <h3 class="subsection-title">4.1. <code>processed_candidates_anonymized_scaled.xlsx</code></h3>
+                <table>
+                    <thead><tr><th>Sütun Adı</th><th>Açıklama</th></tr></thead>
+                    <tbody>
+                        <tr><td>ID</td><td>Anonim ID</td></tr>
+                        <tr><td>Deneyim Seviyesi (Kategori)</td><td>Deneyim aralıklarına göre kategorik skor (0/1/2/4)</td></tr>
+                        <tr><td>Yabancı Dil Skoru (Scaled)</td><td>Genel dil seviyesi (0-100 normalize)</td></tr>
+                        <tr><td>Eğitim Seviyesi Skoru (Scaled)</td><td>Eğitim düzeyi (0-100 normalize)</td></tr>
+                        <tr><td>Basic Computer Skills Skoru (Scaled)</td><td>Yazılım skoru (0-100 normalize)</td></tr>
+                        <tr><td>Katıldığınız Kurs/Seminer/Sertifika Skoru (Scaled)</td><td>Sertifika sayısı ve niteliğine göre skor (0-100 normalize)</td></tr>
+                        <tr><td>Sosyal Aktivite Skoru (0-100) (Scaled)</td><td>Embedding ile çıkarılmış sosyal aktivite skoru (0-100 normalize)</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 class="subsection-title">4.2. <code>ahp_weights_summary.xlsx</code></h3>
+            <ul class="list-disc list-inside content-text pl-4 space-y-1">
+                <li><strong>Sheet <code>Uzman_Agirliklari</code>:</strong> Her uzmanın kriter ağırlıkları.</li>
+                <li><strong>Sheet <code>Birlesik_Agirlik</code>:</strong> Final birleşik ağırlık vektörü.</li>
+                <li><strong>Sheet <code>Consistency_Results</code>:</strong> Lambda_max, CI, CR değerleri (uzman bazlı ve birleşik).</li>
+            </ul>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="table-container">
+                    <h3 class="subsection-title">4.3. <code>TOPSIS_Ranking.xlsx</code></h3>
+                    <table><thead><tr><th>Aday ID</th><th>TOPSIS Score</th><th>TOPSIS Rank</th></tr></thead>
+                        <tbody>
+                            <tr><td>368</td><td>0.373077</td><td>1</td></tr>
+                            <tr><td>216</td><td>0.367996</td><td>2</td></tr>
+                            <tr><td>...</td><td>...</td><td>...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-container">
+                    <h3 class="subsection-title">4.4. <code>ELECTRE_Results.xlsx</code></h3>
+                     <table><thead><tr><th>Aday ID</th><th>ELECTRE Dominance Score</th><th>ELECTRE Rank</th></tr></thead>
+                        <tbody>
+                            <tr><td>368</td><td>272</td><td>1</td></tr>
+                            <tr><td>216</td><td>252</td><td>2</td></tr>
+                            <tr><td>...</td><td>...</td><td>...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+             <div class="table-container mt-4">
+                <h3 class="subsection-title">4.5. <code>combined_ranking_report.xlsx</code></h3>
+                <table>
+                    <thead><tr><th>Aday ID</th><th>TOPSIS Score</th><th>TOPSIS Rank</th><th>ELECTRE Dominance Score</th><th>ELECTRE Rank</th></tr></thead>
+                    <tbody>
+                        <tr><td>368</td><td>0.373077</td><td>1</td><td>272</td><td>1</td></tr>
+                        <tr><td>216</td><td>0.367996</td><td>2</td><td>252</td><td>2</td></tr>
+                        <tr><td>310</td><td>0.348643</td><td>9</td><td>208</td><td>10</td></tr>
+                        <tr><td>332</td><td>0.348422</td><td>10</td><td>212</td><td>9</td></tr>
+                        <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="content-text">Diğer ELECTRE ara çıktı dosyaları (<code>ELECTRE_Concordance.xlsx</code>, <code>ELECTRE_Discordance.xlsx</code>, <code>ELECTRE_Outranking.xlsx</code>) ilgili matrisleri içerir.</p>
+        </section>
+
+        <section id="metodoloji" class="bg-white p-6 md:p-8 rounded-lg shadow-md mb-8">
+            <h2 class="section-title">5. Genel Metodoloji Özeti</h2>
+            <ol class="list-decimal list-inside content-text pl-4 space-y-2">
+                <li>Veri Temizleme ve Özellik Çıkarma</li>
+                <li>AHP ile Kriter Ağırlıklarının Belirlenmesi</li>
+                <li>Tutarlılık Analizi (CR ≤ 0.15 filtresi)</li>
+                <li>Aday Verisinin Nihai Hazırlığı (Normalizasyon)</li>
+                <li>TOPSIS ile İdeal Çözüm Bazlı Sıralama</li>
+                <li>ELECTRE ile Baskınlık Analizi</li>
+                <li>Birleşik Raporlama ve Karar Destek</li>
+                <li>Görselleştirme ve İnteraktif Analiz</li>
+            </ol>
+            <h3 class="subsection-title">Metodolojik Sinerji</h3>
+            <p class="content-text">
+                Bu metodolojik adımlar, birbirini tamamlayan ve birbiri üzerine inşa edilen bir bütün oluşturur. Her bir adım, bir sonrakinin kalitesini ve anlamlılığını besler, bu da sürecin bütünsel gücünü artırır.
+            </p>
+        </section>
+
+        <section id="sonuclar" class="bg-white p-6 md:p-8 rounded-lg shadow-md mb-8">
+            <h2 class="section-title">6. Sonuç ve Değerlendirme</h2>
+            <h3 class="subsection-title">Proje Çıktılarının Özeti</h3>
+            <ul class="list-disc list-inside content-text pl-4 space-y-1">
+                <li><strong>Tam Sıralama (TOPSIS):</strong> Net ve tam bir öncelik listesi.</li>
+                <li><strong>Baskınlık Grubu (ELECTRE):</strong> Güçlü ve az riskli adayların belirlenmesi.</li>
+                <li><strong>Birleşik Rapor:</strong> Metodolojiler arası karşılaştırmalı sonuçlar.</li>
+                <li><strong>Görselleştirme ve Parametrik Analiz Araçları:</strong> Etkili sunum ve interaktif inceleme.</li>
+            </ul>
+            <h3 class="subsection-title">Sistemin Katkıları ve Üstünlükleri</h3>
+            <p class="content-text">Nesnellik, şeffaflık, kapsamlılık, esneklik ve karar kalitesinin artırılması sistemin başlıca faydalarıdır.</p>
+            <h3 class="subsection-title">Gelecek Çalışmalar ve Potansiyel İyileştirmeler</h3>
+            <p class="content-text">Farklı ÇKKV metotlarının entegrasyonu, grup karar verme teknikleri, belirsizlik yönetimi, kullanıcı arayüzü geliştirme ve dinamik kriter ağırlıklandırması gibi alanlarda iyileştirmeler yapılabilir.</p>
+             <h3 class="subsection-title">Genel Değerlendirme</h3>
+            <p class="content-text">
+                Bu proje, AHP, TOPSIS ve ELECTRE gibi güçlü ÇKKV metodolojilerini başarılı bir şekilde bir araya getirerek, aday değerlendirme problemine yapılandırılmış, şeffaf, nesnel ve analitik bir çözüm sunmuştur.
+            </p>
+        </section>
+    </main>
+
+    <footer class="bg-indigo-800 text-white text-center py-6 mt-8">
+        <p>&copy; 2024 Aday Değerlendirme Sistemi Projesi. Tüm hakları saklıdır.</p>
+        <p class="text-sm opacity-75">Bu web sayfası, proje kılavuzundaki verilere dayanarak oluşturulmuştur.</p>
+    </footer>
+
+    <script>
+        const wrapLabel = (label, maxWidth = 15) => {
+            if (typeof label !== 'string' || label.length <= maxWidth) {
+                return label;
+            }
+            const words = label.split(' ');
+            const lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + ' ' + word).trim().length > maxWidth && currentLine.length > 0) {
+                    lines.push(currentLine);
+                    currentLine = word;
+                } else {
+                    currentLine = (currentLine + ' ' + word).trim();
+                }
+            }
+            if (currentLine) {
+                lines.push(currentLine);
+            }
+            return lines;
+        };
+
+        const tooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+                return label.join(' ');
+            }
+            return label;
+        };
+
+        const commonChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        font: { size: 10 }
+                    }
+                },
+                tooltip: {
+                    callbacks: { title: tooltipTitleCallback },
+                    bodyFont: { size: 10 },
+                    titleFont: { size: 12 }
+                }
+            },
+            scales: {
+                x: { ticks: { font: { size: 10 } } },
+                y: { ticks: { font: { size: 10 } } }
+            }
+        };
+        
+        // 1. AHP Birleşik Ağırlıklar Grafiği
+        const ahpCriteria = [
+            wrapLabel('Deneyim Seviyesi (Kategori)', 25), 
+            wrapLabel('Yabancı Dil Skoru', 25), 
+            wrapLabel('Eğitim Seviyesi Skoru', 25), 
+            wrapLabel('Basic Computer Skills Skoru', 25), 
+            wrapLabel('Katıldığınız Kurs/Seminer/Sertifika Skoru', 25), 
+            wrapLabel('Sosyal Aktivite Skoru (0-100)', 25)
+        ];
+        const ahpWeightsData = [0.3576, 0.1033, 0.1076, 0.2455, 0.0521, 0.1339];
+        new Chart(document.getElementById('ahpWeightsChart'), {
+            type: 'bar',
+            data: {
+                labels: ahpCriteria,
+                datasets: [{
+                    label: 'Birleşik Ağırlık',
+                    data: ahpWeightsData,
+                    backgroundColor: 'rgba(79, 70, 229, 0.7)', // indigo-600
+                    borderColor: 'rgba(67, 56, 202, 1)', // indigo-800
+                    borderWidth: 1
+                }]
+            },
+            options: { ...commonChartOptions, indexAxis: 'y', plugins: {...commonChartOptions.plugins, legend: {display: false}} }
+        });
+
+        // 2. Uzman Ağırlıkları Radar Grafiği
+        const expertWeightsData = {
+            labels: ahpCriteria,
+            datasets: [
+                { label: 'Uzman 1 (CR 0.286)', data: [0.1514, 0.2939, 0.3517, 0.0361, 0.0330, 0.1339], borderColor: 'rgba(255, 99, 132, 1)', backgroundColor: 'rgba(255, 99, 132, 0.2)'},
+                { label: 'Uzman 2 (CR 0.206)', data: [0.2230, 0.2607, 0.2265, 0.1043, 0.0427, 0.1427], borderColor: 'rgba(54, 162, 235, 1)', backgroundColor: 'rgba(54, 162, 235, 0.2)'},
+                { label: 'Uzman 3 (CR 0.170)', data: [0.4888, 0.0360, 0.1496, 0.2073, 0.0467, 0.0715], borderColor: 'rgba(255, 206, 86, 1)', backgroundColor: 'rgba(255, 206, 86, 0.2)'},
+                { label: 'Uzman 4 (CR 0.095)', data: [0.2746, 0.0249, 0.0581, 0.4609, 0.1099, 0.0717], borderColor: 'rgba(75, 192, 192, 1)', backgroundColor: 'rgba(75, 192, 192, 0.2)'},
+                { label: 'Uzman 5 (CR 0.084)', data: [0.2755, 0.4010, 0.0540, 0.0937, 0.0383, 0.1375], borderColor: 'rgba(153, 102, 255, 1)', backgroundColor: 'rgba(153, 102, 255, 0.2)'},
+                { label: 'Uzman 6 (CR 0.035)', data: [0.3795, 0.0693, 0.2494, 0.1339, 0.0440, 0.1239], borderColor: 'rgba(255, 159, 64, 1)', backgroundColor: 'rgba(255, 159, 64, 0.2)'}
+            ]
+        };
+        new Chart(document.getElementById('expertWeightsRadarChart'), {
+            type: 'radar',
+            data: expertWeightsData,
+            options: { ...commonChartOptions, 
+                scales: { r: { angleLines: { display: true }, suggestedMin: 0, suggestedMax: 0.5, pointLabels: { font: {size: 9}}}}}
+        });
+
+        // 3. TOPSIS Skorları Grafiği
+        const topsisCandidates = ['Aday 368', 'Aday 216', 'Aday 206', 'Aday 138', 'Aday 338', 'Aday 34', 'Aday 131', 'Aday 241', 'Aday 310', 'Aday 332'];
+        const topsisScoresData = [0.373, 0.368, 0.364, 0.359, 0.357, 0.354, 0.351, 0.351, 0.349, 0.348];
+        new Chart(document.getElementById('topsisScoresChart'), {
+            type: 'bar',
+            data: {
+                labels: topsisCandidates.map(c => wrapLabel(c, 10)),
+                datasets: [{
+                    label: 'TOPSIS Skoru',
+                    data: topsisScoresData,
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)', // blue-500
+                    borderColor: 'rgba(30, 136, 229, 1)', // blue-700
+                    borderWidth: 1
+                }]
+            },
+            options: { ...commonChartOptions, indexAxis: 'y', plugins: {...commonChartOptions.plugins, legend: {display: false}} }
+        });
+
+        // 4. ELECTRE Skorları Grafiği
+        const electreCandidates = ['Aday 368', 'Aday 216', 'Aday 206', 'Aday 138', 'Aday 338', 'Aday 34', 'Aday 131', 'Aday 241', 'Aday 332', 'Aday 310'];
+        const electreScoresData = [272, 252, 246, 236, 234, 228, 218, 214, 212, 208]; // Varsayımsal skorlar (sıraya göre)
+         new Chart(document.getElementById('electreScoresChart'), {
+            type: 'bar',
+            data: {
+                labels: electreCandidates.map(c => wrapLabel(c,10)),
+                datasets: [{
+                    label: 'ELECTRE Baskınlık Skoru',
+                    data: electreScoresData,
+                    backgroundColor: 'rgba(255, 159, 64, 0.7)', // orange-500
+                    borderColor: 'rgba(245, 124, 0, 1)', // orange-700
+                    borderWidth: 1
+                }]
+            },
+            options: { ...commonChartOptions, indexAxis: 'y', plugins: {...commonChartOptions.plugins, legend: {display: false}} }
+        });
+        
+        // 5. TOPSIS vs ELECTRE Saçılım Grafiği
+        const scatterData = [
+            { x: 0.373, y: 1, label: 'Aday 368' }, { x: 0.368, y: 2, label: 'Aday 216' },
+            { x: 0.364, y: 3, label: 'Aday 206' }, { x: 0.359, y: 4, label: 'Aday 138' },
+            { x: 0.357, y: 5, label: 'Aday 338' }, { x: 0.354, y: 6, label: 'Aday 34' },
+            { x: 0.351, y: 7, label: 'Aday 131' }, { x: 0.351, y: 8, label: 'Aday 241' },
+            { x: 0.349, y: 10, label: 'Aday 310'}, { x: 0.348, y: 9, label: 'Aday 332'},
+            // Örnek diğer adaylar (rastgeleleştirilmiş)
+            { x: 0.25, y: 50, label: 'Aday X'}, { x: 0.15, y: 150, label: 'Aday Y'},
+            { x: 0.30, y: 25, label: 'Aday Z'}, { x: 0.20, y: 100, label: 'Aday W'}
+        ];
+        new Chart(document.getElementById('topsisVsElectreScatterChart'), {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'Adaylar',
+                    data: scatterData,
+                    backgroundColor: 'rgba(124, 77, 255, 0.7)', // deep-purple-500
+                    borderColor: 'rgba(81, 45, 168, 1)', // deep-purple-800
+                    pointRadius: 5
+                }]
+            },
+            options: {
+                ...commonChartOptions,
+                scales: {
+                    x: { ...commonChartOptions.scales.x, title: { display: true, text: 'TOPSIS Skoru', font:{size:12} } },
+                    y: { ...commonChartOptions.scales.y, reverse: true, title: { display: true, text: 'ELECTRE Sırası', font:{size:12} } }
+                },
+                plugins: {
+                    ...commonChartOptions.plugins,
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.raw.label + ': (TOPSIS: ' + context.raw.x + ', ELECTRE Sıra: ' + context.raw.y + ')';
+                            },
+                            title: () => null // Başlığı gizle, label'da aday adı var
+                        }
+                    }
+                }
+            }
+        });
+
+        // 6. ELECTRE Outranking Matrisi Heatmap
+        const electreOutrankingMatrix = [ // Örnek 15x15 matris
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
+            [1,1,1,1,0,0,0,0,0,0,0,0,0,0,0],
+            [1,1,1,1,1,0,0,0,0,0,0,0,0,0,0],
+            [1,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
+            [1,1,1,1,1,1,1,0,0,0,0,0,0,0,0],
+            [1,1,1,1,1,1,1,1,0,1,0,0,0,0,0],
+            [1,1,1,1,1,1,1,1,0,0,0,0,0,0,0],
+            [1,1,1,1,1,1,1,1,1,1,0,1,0,0,0],
+            [1,1,1,1,1,1,1,1,1,1,0,0,0,0,0],
+            [1,1,1,1,1,1,1,1,1,1,1,1,0,1,0],
+            [1,1,1,1,1,1,1,1,1,1,1,1,0,0,0],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,0]
+        ];
+        const heatmapLabels = electreCandidates.slice(0,15).map((c,i) => `Aday ${i+1}`); // İlk 15 aday için genel etiket
+        
+        Plotly.newPlot('electreOutrankingHeatmap', [{
+            z: electreOutrankingMatrix,
+            x: heatmapLabels,
+            y: heatmapLabels,
+            type: 'heatmap',
+            colorscale: [['0.0', '#e0f2fe'], ['1.0', '#075985']], // light-sky-100 to cyan-800
+            showscale: false,
+            hovertemplate: 'Satır Adayı: %{y}<br>Sütun Adayı: %{x}<br>Baskınlık: %{z}<extra></extra>'
+        }], {
+            margin: { t: 20, b: 80, l: 80, r: 20 }, // Adjusted margins for labels
+            xaxis: { tickangle: -45, automargin: true, tickfont: {size: 9} },
+            yaxis: { autorange: 'reversed', automargin: true, tickfont: {size: 9} },
+            font: { family: 'Inter, sans-serif' },
+            width: document.getElementById('electreOutrankingHeatmap').parentElement.clientWidth - 40, // Adjust width based on parent
+            height: document.getElementById('electreOutrankingHeatmap').parentElement.clientHeight - 40 // Adjust height based on parent
+        }, {responsive: true});
+
+
+        // Sticky Navbar Logic
+        window.onscroll = function() {myFunction()};
+        var navbar = document.getElementById("navbar");
+        var sticky = navbar.offsetTop;
+        function myFunction() {
+          if (window.pageYOffset >= sticky) {
+            navbar.classList.add("sticky-nav-active") // You can define this class for active sticky styles
+          } else {
+            navbar.classList.remove("sticky-nav-active");
+          }
+        }
+
+    </script>
+</body>
+</html>
